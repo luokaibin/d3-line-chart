@@ -1,0 +1,30 @@
+{
+  "name": "d3-line-chart",
+  "version": "1.0.0",
+  "description": "A D3.js based line chart web component",
+  "main": "dist/d3-line-chart.js",
+  "module": "dist/d3-line-chart.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "test": "jest",
+    "demo": "http-server -o ./demo"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/d3": "^7.4.3",
+    "@types/jest": "^29.5.14",
+    "http-server": "^14.1.1",
+    "jest": "^29.7.0",
+    "rollup": "^4.34.9",
+    "ts-jest": "^29.2.6",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.2"
+  }
+}

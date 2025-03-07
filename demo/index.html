@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3折线图Web Component演示</title>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="../dist/d3-line-chart.min.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .chart-container {
+      height: 400px;
+      margin-bottom: 30px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+    }
+    
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .control-group {
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+    
+    .control-group h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #555;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+    
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      font-weight: bold;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    .code-example {
+      background-color: #f8f8f8;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    
+    pre {
+      margin: 0;
+    }
+    
+    code {
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>D3折线图Web Component演示</h1>
+    
+    <div class="chart-container">
+      <d3-line-chart id="chart"></d3-line-chart>
+    </div>
+    
+    <div class="controls">
+      <div class="control-group">
+        <h3>基本配置</h3>
+        <label>
+          折线颜色:
+          <input type="color" id="lineColor" value="#3498db">
+        </label>
+        <label>
+          显示阴影:
+          <input type="checkbox" id="showShadow" checked>
+        </label>
+        <label>
+          网格线颜色:
+          <input type="color" id="gridColor" value="#e0e0e0">
+        </label>
+        <label>
+          坐标轴文本颜色:
+          <input type="color" id="axisTextColor" value="#333333">
+        </label>
+        <label>
+          坐标轴文本大小:
+          <input type="text" id="axisTextSize" value="12px">
+        </label>
+        <label>
+          网格线刻度值小数位数:
+          <input type="number" id="gridNumberDecimal" value="0" min="0" max="5">
+        </label>
+        <button id="applyFormatting">应用格式化</button>
+      </div>
+      
+      <div class="control-group">
+        <h3>动画配置</h3>
+        <label>
+          启用动画:
+          <input type="checkbox" id="enableAnimation" checked>
+        </label>
+        <label>
+          动画时长 (毫秒):
+          <input type="number" id="animationDuration" value="1000" min="100" max="5000" step="100">
+        </label>
+        <button id="applyConfig">应用配置</button>
+        <button id="resetConfig">重置配置</button>
+      </div>
+      
+      <div class="control-group">
+        <h3>数据生成</h3>
+        <label>
+          数据点数量:
+          <input type="number" id="dataPoints" value="50" min="10" max="1000">
+        </label>
+        <label>
+          数据类型:
+          <select id="dataType">
+            <option value="sine">正弦波</option>
+            <option value="random">随机数据</option>
+            <option value="linear">线性增长</option>
+            <option value="large">大数值(K/M)</option>
+          </select>
+        </label>
+        <div id="largeValueOptions" style="display: none;">
+          <label>
+            最小值:
+            <input type="number" id="minValue" value="10000" min="0">
+          </label>
+          <label>
+            最大值:
+            <input type="number" id="maxValue" value="1000000" min="0">
+          </label>
+        </div>
+        <button id="generateData">生成数据</button>
+      </div>
+      
+      <div class="control-group">
+        <h3>关键点配置</h3>
+        <label>
+          关键点数量:
+          <input type="number" id="keyPointCount" value="3" min="0" max="10">
+        </label>
+        <button id="generateKeyPoints">生成关键点</button>
+      </div>
+      
+      <div class="control-group">
+        <h3>关键刻度点配置</h3>
+        <label>
+          关键刻度点数量:
+          <input type="number" id="keyTickCount" value="5" min="0" max="10">
+        </label>
+        <button id="generateKeyTicks">生成关键刻度点</button>
+      </div>
+    </div>
+    
+    <div class="code-example">
+      <h3>使用示例代码</h3>
+      <pre><code>// 获取折线图实例
+const chart = document.querySelector('d3-line-chart');
+
+// 设置配置
+chart.setConfig({
+  lineColor: '#3498db',
+  showShadow: true,
+  gridColor: '#e0e0e0',
+  enableAnimation: true,
+  animationDuration: 1000,
+  axisTextColor: '#333333',
+  axisTextSize: '12px',
+  gridNumberDecimal: 0
+});
+
+// 设置数据
+chart.setData([
+  { x: 0, y: 10 },
+  { x: 1, y: 15 },
+  { x: 2, y: 8 },
+  // ...
+]);
+
+// 设置关键点
+chart.setKeyPoints([
+  { 
+    x: 1, 
+    y: 15, 
+    render: `&lt;div style="border: 2px solid #3498db;border-radius: 50%;width: 30px;height: 30px;overflow: hidden;"&gt;
+      &lt;img src="https://via.placeholder.com/30" style="width:100%;height:100%;" /&gt;
+    &lt;/div&gt;` 
+  }
+]);
+
+// 设置关键刻度点
+chart.setKeyTicks([
+  { x: 0, label: '开始' },
+  { x: 25, label: '25%' },
+  { x: 50, label: '中点' }
+]);</code></pre>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 获取折线图实例
+      const chart = document.getElementById('chart');
+      
+      // 获取控制元素
+      const lineColorInput = document.getElementById('lineColor');
+      const showShadowInput = document.getElementById('showShadow');
+      const gridColorInput = document.getElementById('gridColor');
+      const axisTextColorInput = document.getElementById('axisTextColor');
+      const axisTextSizeInput = document.getElementById('axisTextSize');
+      const gridNumberDecimalInput = document.getElementById('gridNumberDecimal');
+      const enableAnimationInput = document.getElementById('enableAnimation');
+      const animationDurationInput = document.getElementById('animationDuration');
+      const applyConfigButton = document.getElementById('applyConfig');
+      const resetConfigButton = document.getElementById('resetConfig');
+      const dataPointsInput = document.getElementById('dataPoints');
+      const dataTypeSelect = document.getElementById('dataType');
+      const generateDataButton = document.getElementById('generateData');
+      const keyPointCountInput = document.getElementById('keyPointCount');
+      const generateKeyPointsButton = document.getElementById('generateKeyPoints');
+      const keyTickCountInput = document.getElementById('keyTickCount');
+      const generateKeyTicksButton = document.getElementById('generateKeyTicks');
+      const largeValueOptions = document.getElementById('largeValueOptions');
+      const minValueInput = document.getElementById('minValue');
+      const maxValueInput = document.getElementById('maxValue');
+      const applyFormattingButton = document.getElementById('applyFormatting');
+      
+      // 默认配置
+      const defaultConfig = {
+        lineColor: '#3498db',
+        showShadow: true,
+        gridColor: '#e0e0e0',
+        enableAnimation: true,
+        animationDuration: 1000,
+        axisTextColor: '#333333',
+        axisTextSize: '12px',
+        gridNumberDecimal: 0
+      };
+      
+      // 应用默认配置
+      chart.setConfig(defaultConfig);
+      
+      // 生成示例数据
+      generateData();
+      
+      // 应用配置按钮点击事件
+      applyConfigButton.addEventListener('click', () => {
+        const config = {
+          lineColor: lineColorInput.value,
+          showShadow: showShadowInput.checked,
+          gridColor: gridColorInput.value,
+          enableAnimation: enableAnimationInput.checked,
+          animationDuration: parseInt(animationDurationInput.value),
+          axisTextColor: axisTextColorInput.value,
+          axisTextSize: axisTextSizeInput.value,
+          gridNumberDecimal: parseInt(gridNumberDecimalInput.value)
+        };
+        
+        chart.setConfig(config);
+        chart.setEnableAnimation(enableAnimationInput.checked, parseInt(animationDurationInput.value));
+        
+        // 重新生成数据以触发动画
+        generateData();
+      });
+      
+      // 重置配置按钮点击事件
+      resetConfigButton.addEventListener('click', () => {
+        // 重置输入控件
+        lineColorInput.value = defaultConfig.lineColor;
+        showShadowInput.checked = defaultConfig.showShadow;
+        gridColorInput.value = defaultConfig.gridColor;
+        axisTextColorInput.value = defaultConfig.axisTextColor;
+        axisTextSizeInput.value = defaultConfig.axisTextSize;
+        gridNumberDecimalInput.value = defaultConfig.gridNumberDecimal;
+        enableAnimationInput.checked = defaultConfig.enableAnimation;
+        animationDurationInput.value = defaultConfig.animationDuration;
+        
+        // 应用默认配置
+        chart.setConfig(defaultConfig);
+        
+        // 重新生成数据
+        generateData();
+      });
+      
+      // 应用格式化按钮点击事件
+      applyFormattingButton.addEventListener('click', () => {
+        const config = {
+          lineColor: lineColorInput.value,
+          showShadow: showShadowInput.checked,
+          gridColor: gridColorInput.value,
+          axisTextColor: axisTextColorInput.value,
+          axisTextSize: axisTextSizeInput.value,
+          gridNumberDecimal: parseInt(gridNumberDecimalInput.value)
+        };
+        
+        chart.setConfig(config);
+      });
+      
+      // 生成数据按钮点击事件
+      generateDataButton.addEventListener('click', generateData);
+      
+      // 生成关键点按钮点击事件
+      generateKeyPointsButton.addEventListener('click', generateKeyPoints);
+      
+      // 生成关键刻度点按钮点击事件
+      generateKeyTicksButton.addEventListener('click', generateKeyTicks);
+      
+      // 数据类型选择事件
+      dataTypeSelect.addEventListener('change', () => {
+        if (dataTypeSelect.value === 'large') {
+          largeValueOptions.style.display = 'block';
+        } else {
+          largeValueOptions.style.display = 'none';
+        }
+      });
+      
+      // 生成数据函数
+      function generateData() {
+        const count = parseInt(dataPointsInput.value);
+        const type = dataTypeSelect.value;
+        const data = [];
+        
+        for (let i = 0; i < count; i++) {
+          const x = i;
+          let y;
+          
+          switch (type) {
+            case 'sine':
+              y = Math.sin(i * 0.2) * 50 + 50;
+              break;
+            case 'random':
+              y = Math.random() * 100;
+              break;
+            case 'linear':
+              y = i * (100 / count);
+              break;
+            case 'large':
+              y = Math.random() * (parseInt(maxValueInput.value) - parseInt(minValueInput.value)) + parseInt(minValueInput.value);
+              break;
+            default:
+              y = Math.sin(i * 0.2) * 50 + 50;
+          }
+          
+          data.push({ x, y });
+        }
+        
+        chart.setData(data);
+        
+        // 自动生成关键点和关键刻度点
+        generateKeyPoints();
+        generateKeyTicks();
+      }
+      
+      // 生成关键点函数
+      function generateKeyPoints() {
+        const count = parseInt(keyPointCountInput.value);
+        const data = chart.getData();
+        
+        if (data.length === 0 || count === 0) {
+          chart.setKeyPoints([]);
+          return;
+        }
+        
+        const keyPoints = [];
+        const step = Math.floor(data.length / (count + 1));
+        
+        for (let i = 1; i <= count; i++) {
+          const index = i * step;
+          if (index < data.length) {
+            const point = data[index];
+            keyPoints.push({
+              x: point.x,
+              y: point.y,
+              render: `<div style="border: 2px solid ${lineColorInput.value};border-radius: 50%;width: 30px;height: 30px;overflow: hidden;display: flex;justify-content: center;align-items: center;background-color: white;">
+                <span style="font-size: 12px;">${i}</span>
+              </div>`
+            });
+          }
+        }
+        
+        chart.setKeyPoints(keyPoints);
+      }
+      
+      // 生成关键刻度点函数
+      function generateKeyTicks() {
+        const count = parseInt(keyTickCountInput.value);
+        const data = chart.getData();
+        
+        if (data.length === 0 || count === 0) {
+          chart.setKeyTicks([]);
+          return;
+        }
+        
+        const keyTicks = [];
+        const maxX = data[data.length - 1].x;
+        
+        for (let i = 0; i < count; i++) {
+          const x = Math.round(maxX * (i / (count - 1)));
+          let label;
+          
+          if (i === 0) {
+            label = '开始';
+          } else if (i === count - 1) {
+            label = '结束';
+          } else {
+            const percentage = Math.round((i / (count - 1)) * 100);
+            label = `${percentage}%`;
+          }
+          
+          keyTicks.push({ x, label });
+        }
+        
+        chart.setKeyTicks(keyTicks);
+      }
+    });
+  </script>
+</body>
+</html>
