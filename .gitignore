@@ -3,7 +3,7 @@ node_modules/
 jspm_packages/
 
 # 构建输出
-dist/
+# dist/ - 不再忽略dist目录，允许提交到仓库
 build/
 *.min.js
 *.min.js.map
