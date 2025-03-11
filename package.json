@@ -1,15 +1,21 @@
 {
-  "name": "d3-line-chart",
+  "name": "@wc-lib/d3-line-chart",
   "version": "1.0.0",
   "description": "A D3.js based line chart web component",
   "main": "dist/d3-line-chart.js",
   "module": "dist/d3-line-chart.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "test": "jest",
-    "demo": "http-server -o ./demo"
+    "demo": "http-server -o ./demo",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -26,5 +32,8 @@
     "ts-jest": "^29.2.6",
     "tslib": "^2.8.1",
     "typescript": "^5.8.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

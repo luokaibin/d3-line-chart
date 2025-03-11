@@ -7,7 +7,7 @@ export default {
   output: [
     {
       file: 'dist/d3-line-chart.js',
-      format: 'umd',
+      format: 'iife',
       name: 'D3LineChart',
       globals: {
         'd3': 'd3'
@@ -16,7 +16,7 @@ export default {
     },
     {
       file: 'dist/d3-line-chart.min.js',
-      format: 'umd',
+      format: 'iife',
       name: 'D3LineChart',
       globals: {
         'd3': 'd3'

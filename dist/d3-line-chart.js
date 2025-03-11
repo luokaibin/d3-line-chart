@@ -1,8 +1,5 @@
-(function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'd3'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.D3LineChart = {}, global.d3));
-})(this, (function (exports, d3) { 'use strict';
+var D3LineChart = (function (exports, d3) {
+    'use strict';
 
     function _interopNamespaceDefault(e) {
         var n = Object.create(null);
@@ -586,5 +583,7 @@
 
     exports.D3LineChart = D3LineChart;
 
-}));
+    return exports;
+
+})({}, d3);
 //# sourceMappingURL=d3-line-chart.js.map
