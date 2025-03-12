@@ -61,6 +61,12 @@
       axisTextColor: '#f00', // 配置坐标轴文本颜色
       axisTextSize: '14px', // 配置坐标轴文本字体大小
       gridNumberDecimal: 2, // 配置网格线左侧的刻度值显示几位小数
+      margin: {
+        top: 30,    // 上边距
+        right: 40,  // 右边距
+        bottom: 50, // 下边距
+        left: 60    // 左边距
+      }
     });
     ```
 3. chart需要对外提供setEnableAnimation方法，用于设置是否启用动画，它接收两个参数，第一个参数表示是否启用动画，第二个参数表示动画的时长，第二个参数可选，默认为1秒钟，setEnableAnimation的使用如下

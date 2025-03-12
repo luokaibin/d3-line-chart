@@ -132,8 +132,26 @@ export class D3LineChart extends HTMLElement {
    */
   setConfig(config: Partial<LineChartConfig>) {
     this.config = { ...this.config, ...config };
+    
+    // 更新margin配置
+    if (config.margin) {
+      this.margin = {
+        top: config.margin.top !== undefined ? config.margin.top : this.margin.top,
+        right: config.margin.right !== undefined ? config.margin.right : this.margin.right,
+        bottom: config.margin.bottom !== undefined ? config.margin.bottom : this.margin.bottom,
+        left: config.margin.left !== undefined ? config.margin.left : this.margin.left
+      };
+    }
+    
     this.render();
     return this;
+  }
+  
+  /**
+   * 获取margin配置
+   */
+  getMargin(): { top: number; right: number; bottom: number; left: number } {
+    return { ...this.margin };
   }
   
   /**

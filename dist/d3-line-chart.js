@@ -29,7 +29,13 @@ var D3LineChart = (function (exports, d3) {
         animationDuration: 1000,
         axisTextColor: '#333333',
         axisTextSize: '12px',
-        gridNumberDecimal: 0
+        gridNumberDecimal: 0,
+        margin: {
+            top: 20,
+            right: 30,
+            bottom: 40,
+            left: 50
+        }
     };
 
     /**
@@ -227,8 +233,23 @@ var D3LineChart = (function (exports, d3) {
          */
         setConfig(config) {
             this.config = { ...this.config, ...config };
+            // 更新margin配置
+            if (config.margin) {
+                this.margin = {
+                    top: config.margin.top !== undefined ? config.margin.top : this.margin.top,
+                    right: config.margin.right !== undefined ? config.margin.right : this.margin.right,
+                    bottom: config.margin.bottom !== undefined ? config.margin.bottom : this.margin.bottom,
+                    left: config.margin.left !== undefined ? config.margin.left : this.margin.left
+                };
+            }
             this.render();
             return this;
+        }
+        /**
+         * 获取margin配置
+         */
+        getMargin() {
+            return { ...this.margin };
         }
         /**
          * 设置是否启用动画

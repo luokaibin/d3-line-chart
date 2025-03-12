@@ -8,6 +8,12 @@ export interface LineChartConfig {
   axisTextColor?: string;    // 坐标轴文本颜色
   axisTextSize?: string;     // 坐标轴文本字体大小
   gridNumberDecimal?: number; // 网格线左侧的刻度值显示几位小数
+  margin?: {                 // 图表边距
+    top?: number;            // 上边距
+    right?: number;          // 右边距
+    bottom?: number;         // 下边距
+    left?: number;           // 左边距
+  };
 }
 
 // 数据点接口
@@ -36,5 +42,11 @@ export const DEFAULT_CONFIG: LineChartConfig = {
   animationDuration: 1000,
   axisTextColor: '#333333',
   axisTextSize: '12px',
-  gridNumberDecimal: 0
+  gridNumberDecimal: 0,
+  margin: {
+    top: 20,
+    right: 30,
+    bottom: 40,
+    left: 50
+  }
 };

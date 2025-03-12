@@ -35,6 +35,15 @@ export declare class D3LineChart extends HTMLElement {
      */
     setConfig(config: Partial<LineChartConfig>): this;
     /**
+     * 获取margin配置
+     */
+    getMargin(): {
+        top: number;
+        right: number;
+        bottom: number;
+        left: number;
+    };
+    /**
      * 设置是否启用动画
      * @param enable 是否启用
      * @param duration 动画时长（毫秒）

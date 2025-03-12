@@ -7,6 +7,12 @@ export interface LineChartConfig {
     axisTextColor?: string;
     axisTextSize?: string;
     gridNumberDecimal?: number;
+    margin?: {
+        top?: number;
+        right?: number;
+        bottom?: number;
+        left?: number;
+    };
 }
 export interface DataPoint {
     x: number;

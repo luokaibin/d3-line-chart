@@ -15,6 +15,7 @@
   - [关键刻度点设置](#关键刻度点设置)
   - [动画控制](#动画控制)
   - [大数值处理](#大数值处理)
+  - [自定义边距](#自定义边距)
 - [性能优化](#性能优化)
 - [浏览器兼容性](#浏览器兼容性)
 - [常见问题](#常见问题)
@@ -189,6 +190,7 @@ export default {
 | `axisTextColor` | string | '#333333' | 坐标轴文本颜色 |
 | `axisTextSize` | string | '12px' | 坐标轴文本大小 |
 | `gridNumberDecimal` | number | 0 | 网格线左侧的刻度值显示几位小数 |
+| `margin` | object | {top: 20, right: 30, bottom: 40, left: 50} | 图表边距，用于控制图表内容与容器边缘的距离 |
 
 ### 方法
 
@@ -210,6 +212,7 @@ export default {
 | `getShowShadow` | - | `boolean` | 获取是否显示阴影 |
 | `getAxisTextColor` | - | `string` | 获取坐标轴文本颜色 |
 | `getAxisTextSize` | - | `string` | 获取坐标轴文本大小 |
+| `getMargin` | - | `{top: number, right: number, bottom: number, left: number}` | 获取图表边距配置 |
 
 ### 数据结构
 
@@ -312,6 +315,27 @@ chart.setConfig({
   gridNumberDecimal: 2
 });
 ```
+
+### 自定义边距
+
+您可以通过设置`margin`配置来自定义图表的边距，这对于适应不同的显示需求非常有用：
+
+```javascript
+// 设置自定义边距
+chart.setConfig({
+  margin: {
+    top: 30,    // 上边距
+    right: 40,  // 右边距
+    bottom: 50, // 下边距
+    left: 60    // 左边距
+  }
+});
+```
+
+边距配置对于以下场景特别有用：
+- 当坐标轴标签较长时，增加左边距和下边距
+- 当图表需要更多的顶部空间来显示标题或注释时
+- 当需要在不同尺寸的容器中保持一致的视觉效果时
 
 ## 性能优化
 
