@@ -211,7 +211,7 @@ var D3LineChart = (function (exports, d3) {
       
       .key-point {
         position: absolute;
-        transform: translate(-50%, -50%);
+        transform: translateX(-50%);
         z-index: 10;
         pointer-events: auto;
       }
@@ -693,8 +693,43 @@ var D3LineChart = (function (exports, d3) {
             validKeyPoints.forEach(point => {
                 const keyPointElement = document.createElement('div');
                 keyPointElement.className = 'key-point';
+                // 计算X轴位置
+                const xAxisY = this.height - this.margin.bottom;
+                // 获取数据点的Y坐标
+                const pointY = this.yScale(point.y);
+                // 设置左侧位置（水平居中）
                 keyPointElement.style.left = `${this.xScale(point.x)}px`;
-                keyPointElement.style.top = `${this.yScale(point.y)}px`;
+                // 创建临时元素来测量高度
+                const tempElement = document.createElement('div');
+                tempElement.className = 'key-point';
+                tempElement.innerHTML = point.render;
+                tempElement.style.position = 'absolute';
+                tempElement.style.visibility = 'hidden';
+                this.container.appendChild(tempElement);
+                // 获取元素高度
+                const elementHeight = tempElement.offsetHeight;
+                // 移除临时元素
+                this.container.removeChild(tempElement);
+                // 定义接近X轴的阈值（例如：距离X轴不到元素高度的2倍）
+                const proximityThreshold = elementHeight * 2;
+                // 判断点是否靠近X轴
+                const isCloseToXAxis = (xAxisY - pointY) < proximityThreshold;
+                // 计算top位置
+                let topPosition;
+                if (isCloseToXAxis) {
+                    // 如果靠近X轴，将关键点显示在数据点上方
+                    topPosition = pointY - elementHeight;
+                    // 确保不超出上边界
+                    if (topPosition < this.margin.top) {
+                        topPosition = this.margin.top;
+                    }
+                }
+                else {
+                    // 如果不靠近X轴，保持在数据点位置
+                    topPosition = pointY;
+                }
+                // 设置top位置
+                keyPointElement.style.top = `${topPosition}px`;
                 keyPointElement.innerHTML = point.render;
                 this.container.appendChild(keyPointElement);
             });

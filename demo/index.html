@@ -583,7 +583,11 @@
             keyPoints.push({
               x: data[index].x,
               y: data[index].y,
-              render: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>`
+              render: `
+              <div style="position: relative;width: 28px;height: 28px;overflow: hidden;">
+                <img src="https://avatars.githubusercontent.com/u/78180384" alt="profile" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid ${color}" />
+              </div>
+              `
             });
           }
         }
