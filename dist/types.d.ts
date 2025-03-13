@@ -6,6 +6,7 @@ export interface LineChartConfig {
     animationDuration?: number;
     axisTextColor?: string;
     axisTextSize?: string;
+    curveType?: 'linear' | 'curve';
     margin?: {
         top?: number;
         right?: number;

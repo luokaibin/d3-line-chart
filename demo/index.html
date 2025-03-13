@@ -185,6 +185,13 @@
           坐标轴文本大小:
           <input type="text" id="axisTextSize" value="12px">
         </label>
+        <label>
+          折线类型:
+          <select id="curveType">
+            <option value="linear">直线</option>
+            <option value="curve">曲线</option>
+          </select>
+        </label>
         <button id="applyFormatting">应用格式化</button>
       </div>
       
@@ -370,6 +377,7 @@
       const gridColorInput = document.getElementById('gridColor');
       const axisTextColorInput = document.getElementById('axisTextColor');
       const axisTextSizeInput = document.getElementById('axisTextSize');
+      const curveTypeSelect = document.getElementById('curveType');
       const enableAnimationInput = document.getElementById('enableAnimation');
       const animationDurationInput = document.getElementById('animationDuration');
       const dataPointsInput = document.getElementById('dataPoints');
@@ -412,7 +420,8 @@
           showShadow: showShadowInput.checked,
           gridColor: gridColorInput.value,
           axisTextColor: axisTextColorInput.value,
-          axisTextSize: axisTextSizeInput.value
+          axisTextSize: axisTextSizeInput.value,
+          curveType: curveTypeSelect.value
         });
       });
       
@@ -444,6 +453,7 @@
         gridColorInput.value = '#e0e0e0';
         axisTextColorInput.value = '#333333';
         axisTextSizeInput.value = '12px';
+        curveTypeSelect.value = 'linear';
         enableAnimationInput.checked = true;
         animationDurationInput.value = '1000';
         
@@ -460,6 +470,7 @@
           gridColor: '#e0e0e0',
           axisTextColor: '#333333',
           axisTextSize: '12px',
+          curveType: 'linear',
           margin: {
             top: 20,
             right: 30,

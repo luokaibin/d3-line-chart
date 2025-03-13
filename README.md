@@ -189,6 +189,7 @@ export default {
 | `animationDuration` | number | 1000 | 动画时长（毫秒） |
 | `axisTextColor` | string | '#333333' | 坐标轴文本颜色 |
 | `axisTextSize` | string | '12px' | 坐标轴文本大小 |
+| `curveType` | string | 'linear' | 折线类型，可选值：'linear'（直线）或'curve'（曲线） |
 | `margin` | object | {top: 20, right: 30, bottom: 40, left: 50} | 图表边距，用于控制图表内容与容器边缘的距离 |
 
 ### 方法
@@ -208,10 +209,11 @@ export default {
 | `getAnimationDuration` | - | `number` | 获取动画时长 |
 | `getGridColor` | - | `string` | 获取网格线颜色 |
 | `getLineColor` | - | `string` | 获取折线颜色 |
-| `getShowShadow` | - | `boolean` | 获取是否显示阴影 |
+| `getCurveType` | - | `string` | 获取折线类型（'linear'或'curve'） |
 | `getAxisTextColor` | - | `string` | 获取坐标轴文本颜色 |
 | `getAxisTextSize` | - | `string` | 获取坐标轴文本大小 |
 | `getMargin` | - | `{top: number, right: number, bottom: number, left: number}` | 获取图表边距配置 |
+| `getShowShadow` | - | `boolean` | 获取是否显示阴影 |
 
 ### 数据结构
 

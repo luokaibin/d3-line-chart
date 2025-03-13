@@ -283,6 +283,13 @@ export class D3LineChart extends HTMLElement {
   }
   
   /**
+   * 获取曲线类型
+   */
+  getCurveType(): 'linear' | 'curve' {
+    return this.config.curveType || DEFAULT_CONFIG.curveType!;
+  }
+  
+  /**
    * 设置ResizeObserver监听大小变化
    */
   private setupResizeObserver() {
@@ -473,6 +480,21 @@ export class D3LineChart extends HTMLElement {
   private drawLine(progress: number) {
     if (!this.ctx || this.data.length === 0) return;
     
+    // 根据配置选择绘制方式
+    if (this.getCurveType() === 'curve') {
+      this.drawCurveLine(progress);
+    } else {
+      this.drawLinearLine(progress);
+    }
+  }
+  
+  /**
+   * 绘制直线折线
+   * @param progress 动画进度 (0-1)
+   */
+  private drawLinearLine(progress: number) {
+    if (!this.ctx || this.data.length === 0) return;
+    
     // 获取当前的左侧边距
     const g = d3.select(this.svgContainer);
     const xAxisLine = g.select('.x-axis');
@@ -484,7 +506,7 @@ export class D3LineChart extends HTMLElement {
     }
     
     // 应用数据抽稀
-    const epsilon = 0.5; // 抽稀阈值
+    const epsilon = 0.6; // 抽稀阈值
     const simplifiedData = rdpAlgorithm(this.data, epsilon);
     
     // 计算动画进度对应的数据点数量
@@ -526,6 +548,84 @@ export class D3LineChart extends HTMLElement {
       
       this.ctx.fillStyle = gradient;
       this.ctx.fill();
+    }
+    
+    this.ctx.restore();
+  }
+  
+  /**
+   * 绘制曲线折线
+   * @param progress 动画进度 (0-1)
+   */
+  private drawCurveLine(progress: number) {
+    if (!this.ctx || this.data.length === 0) return;
+    
+    // 获取当前的左侧边距
+    const g = d3.select(this.svgContainer);
+    const xAxisLine = g.select('.x-axis');
+    let leftMargin = this.margin.left;
+    
+    // 如果已经设置了新的左侧边距，则使用它
+    if (xAxisLine.attr('x1')) {
+      leftMargin = parseFloat(xAxisLine.attr('x1'));
+    }
+    
+    // 应用数据抽稀
+    const epsilon = 0.6; // 抽稀阈值
+    const simplifiedData = rdpAlgorithm(this.data, epsilon);
+    
+    // 计算动画进度对应的数据点数量
+    const dataLength = Math.floor(simplifiedData.length * progress);
+    const animatedData = simplifiedData.slice(0, dataLength);
+    
+    if (animatedData.length < 2) return;
+    
+    // 创建新的比例尺，使用调整后的左侧边距
+    const adjustedXScale = d3.scaleLinear()
+      .domain([d3.min(this.data, d => d.x) || 0, d3.max(this.data, d => d.x) || 0])
+      .range([leftMargin, this.width - this.margin.right]);
+    
+    // 使用D3的line生成器和曲线插值器
+    const line = d3.line<DataPoint>()
+      .x(d => adjustedXScale(d.x))
+      .y(d => this.yScale(d.y))
+      .curve(d3.curveCatmullRom.alpha(0.5)); // 使用CatmullRom曲线，alpha控制曲线张力
+    
+    // 获取路径数据
+    const pathData = line(animatedData);
+    
+    if (!pathData) return;
+    
+    // 绘制曲线
+    this.ctx.save();
+    this.ctx.beginPath();
+    
+    // 使用路径数据绘制
+    const path = new Path2D(pathData);
+    this.ctx.strokeStyle = this.getLineColor();
+    this.ctx.lineWidth = 2;
+    this.ctx.stroke(path);
+    
+    // 绘制阴影
+    if (this.getShowShadow()) {
+      this.ctx.beginPath();
+      
+      // 创建一个新的路径用于填充阴影区域
+      const areaPath = new Path2D(pathData);
+      
+      // 添加闭合区域的路径
+      areaPath.lineTo(adjustedXScale(animatedData[animatedData.length - 1].x), this.height - this.margin.bottom);
+      areaPath.lineTo(adjustedXScale(animatedData[0].x), this.height - this.margin.bottom);
+      areaPath.closePath();
+      
+      // 创建渐变
+      const gradient = this.ctx.createLinearGradient(0, this.margin.top, 0, this.height - this.margin.bottom);
+      const color = this.getLineColor();
+      gradient.addColorStop(0, `${color}80`); // 50% 透明度
+      gradient.addColorStop(1, `${color}00`); // 0% 透明度
+      
+      this.ctx.fillStyle = gradient;
+      this.ctx.fill(areaPath);
     }
     
     this.ctx.restore();

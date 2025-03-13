@@ -109,6 +109,10 @@ export declare class D3LineChart extends HTMLElement {
      */
     getKeyTicks(): KeyTick[];
     /**
+     * 获取曲线类型
+     */
+    getCurveType(): 'linear' | 'curve';
+    /**
      * 设置ResizeObserver监听大小变化
      */
     private setupResizeObserver;
@@ -133,6 +137,16 @@ export declare class D3LineChart extends HTMLElement {
      * @param progress 动画进度 (0-1)
      */
     private drawLine;
+    /**
+     * 绘制直线折线
+     * @param progress 动画进度 (0-1)
+     */
+    private drawLinearLine;
+    /**
+     * 绘制曲线折线
+     * @param progress 动画进度 (0-1)
+     */
+    private drawCurveLine;
     /**
      * 渲染关键点
      */
