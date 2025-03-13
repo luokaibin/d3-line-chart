@@ -377,19 +377,47 @@ export class D3LineChart extends HTMLElement {
    * 绘制网格线和坐标轴
    */
   private drawGridAndAxis() {
-    // 创建SVG组
+    // 清除之前的元素
+    d3.select(this.svgContainer).selectAll('*').remove();
+    
     const g = d3.select(this.svgContainer);
     
     // 生成Y轴刻度
     const yTicks = this.yScale.ticks(5);
     
+    // 格式化刻度值
+    const formattedTicksMap = formatLargeNumber(yTicks);
+
+
+    // 测量文本宽度的临时SVG文本元素
+    const tempText = g.append('text')
+      .attr('class', 'temp-text')
+      .attr('font-size', this.getAxisTextSize())
+      .style('visibility', 'hidden');
+    
+    // 计算格式化后的数字宽度
+    const getTextWidth = (text: string): number => {
+      tempText.text(text);
+      return (tempText.node() as SVGTextElement)?.getBBox().width || 0;
+    };
+    
+    // 计算最大宽度
+    const formattedValues = Object.values(formattedTicksMap);
+    const maxWidth = Math.max(...formattedValues.map(getTextWidth));
+
+    // 计算新的左侧边距（文本宽度 + margin.left + 10）
+    const newLeftMargin = this.margin.left + maxWidth + 10;
+
+    // 移除临时文本元素
+    tempText.remove();
+
     // 绘制横向网格线（Y轴网格线）
     g.selectAll('.grid-line-y')
       .data(yTicks)
       .enter()
       .append('line')
       .attr('class', 'grid-line-y')
-      .attr('x1', this.margin.left)
+      .attr('x1', newLeftMargin)
       .attr('x2', this.width - this.margin.right)
       .attr('y1', d => this.yScale(d))
       .attr('y2', d => this.yScale(d))
@@ -403,18 +431,18 @@ export class D3LineChart extends HTMLElement {
       .enter()
       .append('text')
       .attr('class', 'y-axis-label')
-      .attr('x', this.margin.left - 10)
+      .attr('x', newLeftMargin -10) // 根据文本宽度调整位置
       .attr('y', d => this.yScale(d))
       .attr('dy', '0.32em')
       .attr('text-anchor', 'end')
       .attr('fill', this.getAxisTextColor())
       .attr('font-size', this.getAxisTextSize())
-      .text(d => formatLargeNumber(d, this.config.gridNumberDecimal || 0));
+      .text(d => formattedTicksMap[d]);
     
     // 绘制X轴
     g.append('line')
       .attr('class', 'x-axis')
-      .attr('x1', this.margin.left)
+      .attr('x1', newLeftMargin)
       .attr('x2', this.width - this.margin.right)
       .attr('y1', this.height - this.margin.bottom)
       .attr('y2', this.height - this.margin.bottom)
@@ -445,6 +473,16 @@ export class D3LineChart extends HTMLElement {
   private drawLine(progress: number) {
     if (!this.ctx || this.data.length === 0) return;
     
+    // 获取当前的左侧边距
+    const g = d3.select(this.svgContainer);
+    const xAxisLine = g.select('.x-axis');
+    let leftMargin = this.margin.left;
+    
+    // 如果已经设置了新的左侧边距，则使用它
+    if (xAxisLine.attr('x1')) {
+      leftMargin = parseFloat(xAxisLine.attr('x1'));
+    }
+    
     // 应用数据抽稀
     const epsilon = 0.5; // 抽稀阈值
     const simplifiedData = rdpAlgorithm(this.data, epsilon);
@@ -455,13 +493,18 @@ export class D3LineChart extends HTMLElement {
     
     if (animatedData.length < 2) return;
     
+    // 创建新的比例尺，使用调整后的左侧边距
+    const adjustedXScale = d3.scaleLinear()
+      .domain([d3.min(this.data, d => d.x) || 0, d3.max(this.data, d => d.x) || 0])
+      .range([leftMargin, this.width - this.margin.right]);
+    
     // 绘制折线
     this.ctx.save();
     this.ctx.beginPath();
-    this.ctx.moveTo(this.xScale(animatedData[0].x), this.yScale(animatedData[0].y));
+    this.ctx.moveTo(adjustedXScale(animatedData[0].x), this.yScale(animatedData[0].y));
     
     for (let i = 1; i < animatedData.length; i++) {
-      this.ctx.lineTo(this.xScale(animatedData[i].x), this.yScale(animatedData[i].y));
+      this.ctx.lineTo(adjustedXScale(animatedData[i].x), this.yScale(animatedData[i].y));
     }
     
     this.ctx.strokeStyle = this.getLineColor();
@@ -471,8 +514,8 @@ export class D3LineChart extends HTMLElement {
     // 绘制阴影
     if (this.getShowShadow()) {
       // 继续路径以闭合区域
-      this.ctx.lineTo(this.xScale(animatedData[animatedData.length - 1].x), this.height - this.margin.bottom);
-      this.ctx.lineTo(this.xScale(animatedData[0].x), this.height - this.margin.bottom);
+      this.ctx.lineTo(adjustedXScale(animatedData[animatedData.length - 1].x), this.height - this.margin.bottom);
+      this.ctx.lineTo(adjustedXScale(animatedData[0].x), this.height - this.margin.bottom);
       this.ctx.closePath();
       
       // 创建渐变

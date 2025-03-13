@@ -189,7 +189,6 @@ export default {
 | `animationDuration` | number | 1000 | 动画时长（毫秒） |
 | `axisTextColor` | string | '#333333' | 坐标轴文本颜色 |
 | `axisTextSize` | string | '12px' | 坐标轴文本大小 |
-| `gridNumberDecimal` | number | 0 | 网格线左侧的刻度值显示几位小数 |
 | `margin` | object | {top: 20, right: 30, bottom: 40, left: 50} | 图表边距，用于控制图表内容与容器边缘的距离 |
 
 ### 方法
@@ -310,10 +309,6 @@ for (let i = 0; i < 10; i++) {
 // 设置数据
 chart.setData(largeData);
 
-// 设置小数位数（例如，显示为"1.25M"而不是"1M"）
-chart.setConfig({
-  gridNumberDecimal: 2
-});
 ```
 
 ### 自定义边距

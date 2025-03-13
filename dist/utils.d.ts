@@ -16,11 +16,10 @@ export declare function perpendicularDistance(point: DataPoint, lineStart: DataP
 export declare function rdpAlgorithm(points: DataPoint[], epsilon: number): DataPoint[];
 /**
  * 格式化大数字，如50000 -> 50K
- * @param value 数值
- * @param decimal 小数位数
- * @returns 格式化后的字符串
+ * @param yTicks Y轴刻度值数组
+ * @returns 格式化后的对象，键为原始值，值为格式化后的字符串
  */
-export declare function formatLargeNumber(value: number, decimal?: number): string;
+export declare function formatLargeNumber(yTicks: number[]): Record<number, string>;
 /**
  * 防抖函数
  * @param fn 要执行的函数

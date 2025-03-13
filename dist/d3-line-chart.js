@@ -29,7 +29,6 @@ var D3LineChart = (function (exports, d3) {
         animationDuration: 1000,
         axisTextColor: '#333333',
         axisTextSize: '12px',
-        gridNumberDecimal: 0,
         margin: {
             top: 20,
             right: 30,
@@ -95,20 +94,43 @@ var D3LineChart = (function (exports, d3) {
     }
     /**
      * 格式化大数字，如50000 -> 50K
-     * @param value 数值
-     * @param decimal 小数位数
-     * @returns 格式化后的字符串
+     * @param yTicks Y轴刻度值数组
+     * @returns 格式化后的对象，键为原始值，值为格式化后的字符串
      */
-    function formatLargeNumber(value, decimal = 0) {
-        if (Math.abs(value) >= 1000000) {
-            return (value / 1000000).toFixed(decimal) + 'M';
+    function formatLargeNumber(yTicks) {
+        if (!yTicks || yTicks.length === 0) {
+            return {};
         }
-        else if (Math.abs(value) >= 1000) {
-            return (value / 1000).toFixed(decimal) + 'K';
+        // 创建结果对象
+        const result = {};
+        // 格式化函数，根据小数位格式化数字
+        const format = (value, decimal) => {
+            if (Math.abs(value) >= 1000000) {
+                return (value / 1000000).toFixed(decimal) + 'M';
+            }
+            else if (Math.abs(value) >= 1000) {
+                return (value / 1000).toFixed(decimal) + 'K';
+            }
+            else {
+                return decimal > 0 ? value.toFixed(decimal) : value.toString();
+            }
+        };
+        // 检查格式化后是否有重复值
+        const hasUniqueFormats = (decimal) => {
+            const formattedValues = yTicks.map(value => format(value, decimal));
+            const uniqueValues = new Set(formattedValues);
+            return uniqueValues.size === formattedValues.length;
+        };
+        // 从0位小数开始，逐步增加小数位，直到没有重复值
+        let decimal = 0;
+        while (!hasUniqueFormats(decimal) && decimal < 6) {
+            decimal++;
         }
-        else {
-            return value.toFixed(decimal);
-        }
+        // 使用确定的小数位格式化所有值
+        yTicks.forEach(value => {
+            result[value] = format(value, decimal);
+        });
+        return result;
     }
     /**
      * 防抖函数
@@ -441,17 +463,37 @@ var D3LineChart = (function (exports, d3) {
          * 绘制网格线和坐标轴
          */
         drawGridAndAxis() {
-            // 创建SVG组
+            // 清除之前的元素
+            d3__namespace.select(this.svgContainer).selectAll('*').remove();
             const g = d3__namespace.select(this.svgContainer);
             // 生成Y轴刻度
             const yTicks = this.yScale.ticks(5);
+            // 格式化刻度值
+            const formattedTicksMap = formatLargeNumber(yTicks);
+            // 测量文本宽度的临时SVG文本元素
+            const tempText = g.append('text')
+                .attr('class', 'temp-text')
+                .attr('font-size', this.getAxisTextSize())
+                .style('visibility', 'hidden');
+            // 计算格式化后的数字宽度
+            const getTextWidth = (text) => {
+                tempText.text(text);
+                return tempText.node()?.getBBox().width || 0;
+            };
+            // 计算最大宽度
+            const formattedValues = Object.values(formattedTicksMap);
+            const maxWidth = Math.max(...formattedValues.map(getTextWidth));
+            // 计算新的左侧边距（文本宽度 + margin.left + 10）
+            const newLeftMargin = this.margin.left + maxWidth + 10;
+            // 移除临时文本元素
+            tempText.remove();
             // 绘制横向网格线（Y轴网格线）
             g.selectAll('.grid-line-y')
                 .data(yTicks)
                 .enter()
                 .append('line')
                 .attr('class', 'grid-line-y')
-                .attr('x1', this.margin.left)
+                .attr('x1', newLeftMargin)
                 .attr('x2', this.width - this.margin.right)
                 .attr('y1', d => this.yScale(d))
                 .attr('y2', d => this.yScale(d))
@@ -464,17 +506,17 @@ var D3LineChart = (function (exports, d3) {
                 .enter()
                 .append('text')
                 .attr('class', 'y-axis-label')
-                .attr('x', this.margin.left - 10)
+                .attr('x', newLeftMargin - 10) // 根据文本宽度调整位置
                 .attr('y', d => this.yScale(d))
                 .attr('dy', '0.32em')
                 .attr('text-anchor', 'end')
                 .attr('fill', this.getAxisTextColor())
                 .attr('font-size', this.getAxisTextSize())
-                .text(d => formatLargeNumber(d, this.config.gridNumberDecimal || 0));
+                .text(d => formattedTicksMap[d]);
             // 绘制X轴
             g.append('line')
                 .attr('class', 'x-axis')
-                .attr('x1', this.margin.left)
+                .attr('x1', newLeftMargin)
                 .attr('x2', this.width - this.margin.right)
                 .attr('y1', this.height - this.margin.bottom)
                 .attr('y2', this.height - this.margin.bottom)
@@ -503,6 +545,14 @@ var D3LineChart = (function (exports, d3) {
         drawLine(progress) {
             if (!this.ctx || this.data.length === 0)
                 return;
+            // 获取当前的左侧边距
+            const g = d3__namespace.select(this.svgContainer);
+            const xAxisLine = g.select('.x-axis');
+            let leftMargin = this.margin.left;
+            // 如果已经设置了新的左侧边距，则使用它
+            if (xAxisLine.attr('x1')) {
+                leftMargin = parseFloat(xAxisLine.attr('x1'));
+            }
             // 应用数据抽稀
             const epsilon = 0.5; // 抽稀阈值
             const simplifiedData = rdpAlgorithm(this.data, epsilon);
@@ -511,12 +561,16 @@ var D3LineChart = (function (exports, d3) {
             const animatedData = simplifiedData.slice(0, dataLength);
             if (animatedData.length < 2)
                 return;
+            // 创建新的比例尺，使用调整后的左侧边距
+            const adjustedXScale = d3__namespace.scaleLinear()
+                .domain([d3__namespace.min(this.data, d => d.x) || 0, d3__namespace.max(this.data, d => d.x) || 0])
+                .range([leftMargin, this.width - this.margin.right]);
             // 绘制折线
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.moveTo(this.xScale(animatedData[0].x), this.yScale(animatedData[0].y));
+            this.ctx.moveTo(adjustedXScale(animatedData[0].x), this.yScale(animatedData[0].y));
             for (let i = 1; i < animatedData.length; i++) {
-                this.ctx.lineTo(this.xScale(animatedData[i].x), this.yScale(animatedData[i].y));
+                this.ctx.lineTo(adjustedXScale(animatedData[i].x), this.yScale(animatedData[i].y));
             }
             this.ctx.strokeStyle = this.getLineColor();
             this.ctx.lineWidth = 2;
@@ -524,8 +578,8 @@ var D3LineChart = (function (exports, d3) {
             // 绘制阴影
             if (this.getShowShadow()) {
                 // 继续路径以闭合区域
-                this.ctx.lineTo(this.xScale(animatedData[animatedData.length - 1].x), this.height - this.margin.bottom);
-                this.ctx.lineTo(this.xScale(animatedData[0].x), this.height - this.margin.bottom);
+                this.ctx.lineTo(adjustedXScale(animatedData[animatedData.length - 1].x), this.height - this.margin.bottom);
+                this.ctx.lineTo(adjustedXScale(animatedData[0].x), this.height - this.margin.bottom);
                 this.ctx.closePath();
                 // 创建渐变
                 const gradient = this.ctx.createLinearGradient(0, this.margin.top, 0, this.height - this.margin.bottom);

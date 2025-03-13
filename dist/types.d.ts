@@ -6,7 +6,6 @@ export interface LineChartConfig {
     animationDuration?: number;
     axisTextColor?: string;
     axisTextSize?: string;
-    gridNumberDecimal?: number;
     margin?: {
         top?: number;
         right?: number;

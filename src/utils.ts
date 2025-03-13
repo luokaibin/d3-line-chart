@@ -66,18 +66,47 @@ export function rdpAlgorithm(points: DataPoint[], epsilon: number): DataPoint[] 
 
 /**
  * 格式化大数字，如50000 -> 50K
- * @param value 数值
- * @param decimal 小数位数
- * @returns 格式化后的字符串
+ * @param yTicks Y轴刻度值数组
+ * @returns 格式化后的对象，键为原始值，值为格式化后的字符串
  */
-export function formatLargeNumber(value: number, decimal: number = 0): string {
-  if (Math.abs(value) >= 1000000) {
-    return (value / 1000000).toFixed(decimal) + 'M';
-  } else if (Math.abs(value) >= 1000) {
-    return (value / 1000).toFixed(decimal) + 'K';
-  } else {
-    return value.toFixed(decimal);
+export function formatLargeNumber(yTicks: number[]): Record<number, string> {
+  if (!yTicks || yTicks.length === 0) {
+    return {};
   }
+  
+  // 创建结果对象
+  const result: Record<number, string> = {};
+  
+  // 格式化函数，根据小数位格式化数字
+  const format = (value: number, decimal: number): string => {
+    if (Math.abs(value) >= 1000000) {
+      return (value / 1000000).toFixed(decimal) + 'M';
+    } else if (Math.abs(value) >= 1000) {
+      return (value / 1000).toFixed(decimal) + 'K';
+    } else {
+      return decimal > 0 ? value.toFixed(decimal) : value.toString();
+    }
+  };
+  
+  // 检查格式化后是否有重复值
+  const hasUniqueFormats = (decimal: number): boolean => {
+    const formattedValues = yTicks.map(value => format(value, decimal));
+    const uniqueValues = new Set(formattedValues);
+    return uniqueValues.size === formattedValues.length;
+  };
+  
+  // 从0位小数开始，逐步增加小数位，直到没有重复值
+  let decimal = 0;
+  while (!hasUniqueFormats(decimal) && decimal < 6) {
+    decimal++;
+  }
+  
+  // 使用确定的小数位格式化所有值
+  yTicks.forEach(value => {
+    result[value] = format(value, decimal);
+  });
+  
+  return result;
 }
 
 /**

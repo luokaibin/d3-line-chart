@@ -60,7 +60,6 @@
       animationDuration: 1000, // 配置动画时长
       axisTextColor: '#f00', // 配置坐标轴文本颜色
       axisTextSize: '14px', // 配置坐标轴文本字体大小
-      gridNumberDecimal: 2, // 配置网格线左侧的刻度值显示几位小数
       margin: {
         top: 30,    // 上边距
         right: 40,  // 右边距

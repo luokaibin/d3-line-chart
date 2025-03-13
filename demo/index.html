@@ -185,10 +185,6 @@
           坐标轴文本大小:
           <input type="text" id="axisTextSize" value="12px">
         </label>
-        <label>
-          网格线刻度值小数位数:
-          <input type="number" id="gridNumberDecimal" value="0" min="0" max="5">
-        </label>
         <button id="applyFormatting">应用格式化</button>
       </div>
       
@@ -240,6 +236,8 @@
             <option value="random">随机数据</option>
             <option value="linear">线性增长</option>
             <option value="large">大数值(K/M)</option>
+            <option value="decimal">小数值</option>
+            <option value="float">浮点数值</option>
           </select>
         </label>
         <div id="largeValueOptions" style="display: none;">
@@ -250,6 +248,20 @@
           <label>
             最大值:
             <input type="number" id="maxValue" value="1000000" min="0">
+          </label>
+        </div>
+        <div id="floatValueOptions" style="display: none;">
+          <label>
+            最小值:
+            <input type="number" id="floatMinValue" value="0" min="0" step="0.1">
+          </label>
+          <label>
+            最大值:
+            <input type="number" id="floatMaxValue" value="1000" min="0" step="0.1">
+          </label>
+          <label>
+            小数精度:
+            <input type="number" id="floatPrecision" value="6" min="1" max="10">
           </label>
         </div>
         <button id="generateData">生成数据</button>
@@ -323,7 +335,6 @@
     animationDuration: 1000,
     axisTextColor: '#333333',
     axisTextSize: '12px',
-    gridNumberDecimal: 0,
     margin: {
       top: 20,
       right: 30,
@@ -359,14 +370,17 @@
       const gridColorInput = document.getElementById('gridColor');
       const axisTextColorInput = document.getElementById('axisTextColor');
       const axisTextSizeInput = document.getElementById('axisTextSize');
-      const gridNumberDecimalInput = document.getElementById('gridNumberDecimal');
       const enableAnimationInput = document.getElementById('enableAnimation');
       const animationDurationInput = document.getElementById('animationDuration');
       const dataPointsInput = document.getElementById('dataPoints');
       const dataTypeSelect = document.getElementById('dataType');
       const largeValueOptions = document.getElementById('largeValueOptions');
+      const floatValueOptions = document.getElementById('floatValueOptions');
       const minValueInput = document.getElementById('minValue');
       const maxValueInput = document.getElementById('maxValue');
+      const floatMinValueInput = document.getElementById('floatMinValue');
+      const floatMaxValueInput = document.getElementById('floatMaxValue');
+      const floatPrecisionInput = document.getElementById('floatPrecision');
       const keyPointCountInput = document.getElementById('keyPointCount');
       const keyTickCountInput = document.getElementById('keyTickCount');
       
@@ -388,6 +402,7 @@
       // 显示/隐藏大数值选项
       dataTypeSelect.addEventListener('change', () => {
         largeValueOptions.style.display = dataTypeSelect.value === 'large' ? 'block' : 'none';
+        floatValueOptions.style.display = dataTypeSelect.value === 'float' ? 'block' : 'none';
       });
       
       // 应用格式化按钮
@@ -397,8 +412,7 @@
           showShadow: showShadowInput.checked,
           gridColor: gridColorInput.value,
           axisTextColor: axisTextColorInput.value,
-          axisTextSize: axisTextSizeInput.value,
-          gridNumberDecimal: parseInt(gridNumberDecimalInput.value, 10)
+          axisTextSize: axisTextSizeInput.value
         });
       });
       
@@ -430,7 +444,6 @@
         gridColorInput.value = '#e0e0e0';
         axisTextColorInput.value = '#333333';
         axisTextSizeInput.value = '12px';
-        gridNumberDecimalInput.value = '0';
         enableAnimationInput.checked = true;
         animationDurationInput.value = '1000';
         
@@ -447,7 +460,6 @@
           gridColor: '#e0e0e0',
           axisTextColor: '#333333',
           axisTextSize: '12px',
-          gridNumberDecimal: 0,
           margin: {
             top: 20,
             right: 30,
@@ -481,32 +493,61 @@
           for (let i = 0; i < count; i++) {
             data.push({
               x: i,
-              y: Math.sin(i * 0.2) * 10 + 15
+              y: Math.sin(i * 0.2) * 10 + 15 + Math.random() * 0.1 // 添加小数部分
             });
           }
         } else if (type === 'random') {
           for (let i = 0; i < count; i++) {
             data.push({
               x: i,
-              y: Math.random() * 30
+              y: Math.random() * 30 + Math.random() * 0.0001 // 添加更小的小数部分
             });
           }
         } else if (type === 'linear') {
           for (let i = 0; i < count; i++) {
+            // 使用更精确的小数值
+            const preciseValue = i * 0.5 + (i % 5 === 0 ? 0.00001 * i : 0.00002 * i);
             data.push({
               x: i,
-              y: i * 0.5
+              y: preciseValue
             });
           }
         } else if (type === 'large') {
           const min = parseInt(minValueInput.value, 10);
           const max = parseInt(maxValueInput.value, 10);
           for (let i = 0; i < count; i++) {
+            // 为大数值添加精确的小数部分
+            const baseValue = Math.random() * (max - min) + min;
+            const decimalPart = Math.random() * 0.0001 * (i + 1);
             data.push({
               x: i,
-              y: Math.random() * (max - min) + min
+              y: baseValue + decimalPart
             });
           }
+        } else if (type === 'decimal') { // 添加新的数据类型：专注于小数值
+          for (let i = 0; i < count; i++) {
+            // 生成接近的小数值，用于测试小数位数增加的情况
+            const baseValue = 1000 + (i * 0.1); // 基础值
+            const smallDifference = 0.0000001 * (i + 1); // 非常小的差异
+            data.push({
+              x: i,
+              y: baseValue + smallDifference
+            });
+          }
+        } else if (type === 'float') { // 添加新的数据类型：浮点数值
+          const min = parseFloat(floatMinValueInput.value);
+          const max = parseFloat(floatMaxValueInput.value);
+          const precision = parseInt(floatPrecisionInput.value, 10);
+          for (let i = 0; i < count; i++) {
+            // 生成浮点数值
+            const floatValue = Math.random() * (max - min) + min;
+            const roundedValue = parseFloat(floatValue.toFixed(precision));
+            data.push({
+              x: i,
+              y: roundedValue
+            });
+          }
+          console.log(data);
         }
         
         chart.setData(data);

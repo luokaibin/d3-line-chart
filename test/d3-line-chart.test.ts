@@ -67,8 +67,7 @@ describe('D3LineChart', () => {
       enableAnimation: false,
       animationDuration: 2000,
       axisTextColor: '#0000ff',
-      axisTextSize: '16px',
-      gridNumberDecimal: 2
+      axisTextSize: '16px'
     };
 
     chart.setConfig(config);
