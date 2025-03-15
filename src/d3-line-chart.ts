@@ -698,7 +698,7 @@ export class D3LineChart extends HTMLElement {
       
       // 计算top位置
       let topPosition;
-      
+
       if (isCloseToXAxis) {
         // 如果靠近X轴，将关键点显示在数据点上方
         topPosition = pointY - elementHeight;
@@ -709,9 +709,9 @@ export class D3LineChart extends HTMLElement {
         }
       } else {
         // 如果不靠近X轴，保持在数据点位置
-        topPosition = pointY;
+        topPosition = pointY - 20;
       }
-      
+
       // 设置top位置
       keyPointElement.style.top = `${topPosition}px`;
       

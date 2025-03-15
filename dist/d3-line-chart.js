@@ -738,7 +738,7 @@ var D3LineChart = (function (exports, d3) {
                 }
                 else {
                     // 如果不靠近X轴，保持在数据点位置
-                    topPosition = pointY;
+                    topPosition = pointY - 20;
                 }
                 // 设置top位置
                 keyPointElement.style.top = `${topPosition}px`;
