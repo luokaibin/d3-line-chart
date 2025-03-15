@@ -658,10 +658,7 @@ export class D3LineChart extends HTMLElement {
       // 获取数据点的Y坐标
       const pointY = this.yScale(point.y);
       
-      // 设置左侧位置（水平居中）
-      keyPointElement.style.left = `${this.xScale(point.x)}px`;
-      
-      // 创建临时元素来测量高度
+      // 创建临时元素来测量尺寸
       const tempElement = document.createElement('div');
       tempElement.className = 'key-point';
       tempElement.innerHTML = point.render;
@@ -669,11 +666,29 @@ export class D3LineChart extends HTMLElement {
       tempElement.style.visibility = 'hidden';
       this.container.appendChild(tempElement);
       
-      // 获取元素高度
+      // 获取元素尺寸
       const elementHeight = tempElement.offsetHeight;
+      const elementWidth = tempElement.offsetWidth;
       
       // 移除临时元素
       this.container.removeChild(tempElement);
+      
+      // 计算关键点的X坐标
+      const pointX = this.xScale(point.x);
+      
+      // 检查是否会超出右边界（考虑到transform: translateX(-50%)的影响，实际宽度是elementWidth/2）
+      const rightEdgePosition = pointX + elementWidth / 2;
+      const isExceedingRightBoundary = rightEdgePosition > (this.width - this.margin.right);
+      
+      // 调整X位置，确保不超出右边界
+      let leftPosition = pointX;
+      if (isExceedingRightBoundary) {
+        // 将元素右对齐到右边界
+        leftPosition = this.width - this.margin.right - elementWidth / 2;
+      }
+      
+      // 设置左侧位置
+      keyPointElement.style.left = `${leftPosition}px`;
       
       // 定义接近X轴的阈值（例如：距离X轴不到元素高度的2倍）
       const proximityThreshold = elementHeight * 2;
