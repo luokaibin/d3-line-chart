@@ -8,6 +8,7 @@ export interface LineChartConfig {
   axisTextColor?: string;    // 坐标轴文本颜色
   axisTextSize?: string;     // 坐标轴文本字体大小
   curveType?: 'linear' | 'curve'; // 折线类型：直线或曲线
+  tickCount?: number;        // Y轴刻度数量
   margin?: {                 // 图表边距
     top?: number;            // 上边距
     right?: number;          // 右边距
@@ -43,6 +44,7 @@ export const DEFAULT_CONFIG: LineChartConfig = {
   axisTextColor: '#333333',
   axisTextSize: '12px',
   curveType: 'linear',
+  tickCount: 5,
   margin: {
     top: 20,
     right: 30,

@@ -192,6 +192,10 @@
             <option value="curve">曲线</option>
           </select>
         </label>
+        <label>
+          Y轴刻度数量:
+          <input type="number" id="tickCount" value="5" min="2" max="20">
+        </label>
         <button id="applyFormatting">应用格式化</button>
       </div>
       
@@ -421,7 +425,8 @@
           gridColor: gridColorInput.value,
           axisTextColor: axisTextColorInput.value,
           axisTextSize: axisTextSizeInput.value,
-          curveType: curveTypeSelect.value
+          curveType: curveTypeSelect.value,
+          tickCount: parseInt(document.getElementById('tickCount').value, 10)
         });
       });
       
@@ -454,6 +459,7 @@
         axisTextColorInput.value = '#333333';
         axisTextSizeInput.value = '12px';
         curveTypeSelect.value = 'linear';
+        document.getElementById('tickCount').value = '5';
         enableAnimationInput.checked = true;
         animationDurationInput.value = '1000';
         
@@ -471,6 +477,7 @@
           axisTextColor: '#333333',
           axisTextSize: '12px',
           curveType: 'linear',
+          tickCount: 5,
           margin: {
             top: 20,
             right: 30,

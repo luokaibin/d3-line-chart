@@ -7,6 +7,7 @@ export interface LineChartConfig {
     axisTextColor?: string;
     axisTextSize?: string;
     curveType?: 'linear' | 'curve';
+    tickCount?: number;
     margin?: {
         top?: number;
         right?: number;

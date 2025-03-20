@@ -368,6 +368,9 @@ export class D3LineChart extends HTMLElement {
     const keyPointElements = this.shadow.querySelectorAll('.key-point');
     keyPointElements.forEach(el => el.remove());
     
+    // 调整Y轴比例尺
+    this.extendYScaleDomain();
+    
     // 绘制网格线和坐标轴
     this.drawGridAndAxis();
     
@@ -381,6 +384,43 @@ export class D3LineChart extends HTMLElement {
   }
   
   /**
+   * 扩展Y轴比例尺域，以便更好地显示数据
+   */
+  private extendYScaleDomain(): void {
+    // 生成Y轴刻度
+    let yTicks = this.yScale.ticks(this.getTickCount());
+    
+    // 计算刻度间距并添加一个额外的更小刻度
+    if (yTicks.length >= 2) {
+      // 对刻度进行排序（从小到大）
+      yTicks.sort((a, b) => a - b);
+      
+      // 获取数据的最小值
+      const dataMin = d3.min(this.data, d => d.y) || 0;
+      
+      // 只有当最小刻度值大于数据的最小值时，才进行扩展
+      if (yTicks[0] > dataMin) {
+        // 计算最小的刻度间距
+        const minTickDiff = yTicks[1] - yTicks[0];
+        
+        // 创建一个比最小刻度更小的刻度
+        const extraTick = yTicks[0] - minTickDiff;
+        
+        // 调整domain，使其包含extraTick
+        const currentDomain = this.yScale.domain();
+        this.yScale.domain([extraTick, currentDomain[1]]);
+      }
+    }
+  }
+  
+  /**
+   * 获取刻度数量
+   */
+  private getTickCount(): number {
+    return this.config.tickCount || DEFAULT_CONFIG.tickCount || 5;
+  }
+  
+  /**
    * 绘制网格线和坐标轴
    */
   private drawGridAndAxis() {
@@ -389,13 +429,11 @@ export class D3LineChart extends HTMLElement {
     
     const g = d3.select(this.svgContainer);
     
-    // 生成Y轴刻度
-    const yTicks = this.yScale.ticks(5);
-    
+    // 使用已调整好的比例尺生成刻度
+    let yTicks = this.yScale.ticks(this.getTickCount());
     // 格式化刻度值
     const formattedTicksMap = formatLargeNumber(yTicks);
-
-
+    
     // 测量文本宽度的临时SVG文本元素
     const tempText = g.append('text')
       .attr('class', 'temp-text')
@@ -446,13 +484,13 @@ export class D3LineChart extends HTMLElement {
       .attr('font-size', this.getAxisTextSize())
       .text(d => formattedTicksMap[d]);
     
-    // 绘制X轴
+    // 绘制X轴（与额外添加的最小刻度对齐）
     g.append('line')
       .attr('class', 'x-axis')
       .attr('x1', newLeftMargin)
       .attr('x2', this.width - this.margin.right)
-      .attr('y1', this.height - this.margin.bottom)
-      .attr('y2', this.height - this.margin.bottom)
+      .attr('y1', this.yScale(yTicks[0])) // 使用新添加的最小刻度
+      .attr('y2', this.yScale(yTicks[0])) // 使用新添加的最小刻度
       .attr('stroke', this.getGridColor())
       .attr('stroke-dasharray', '3,3')
       .attr('stroke-width', 1);
@@ -465,7 +503,7 @@ export class D3LineChart extends HTMLElement {
         .append('text')
         .attr('class', 'key-tick')
         .attr('x', d => this.xScale(d.x))
-        .attr('y', this.height - this.margin.bottom + 20)
+        .attr('y', this.yScale(yTicks[0]) + 20) // 将关键刻度点放在X轴下方20像素处
         .attr('text-anchor', 'middle')
         .attr('fill', this.getAxisTextColor())
         .attr('font-size', this.getAxisTextSize())
@@ -523,6 +561,7 @@ export class D3LineChart extends HTMLElement {
     // 绘制折线
     this.ctx.save();
     this.ctx.beginPath();
+    
     this.ctx.moveTo(adjustedXScale(animatedData[0].x), this.yScale(animatedData[0].y));
     
     for (let i = 1; i < animatedData.length; i++) {
@@ -639,6 +678,7 @@ export class D3LineChart extends HTMLElement {
     const validKeyPoints = this.keyPoints.filter(point => {
       const x = this.xScale(point.x);
       const y = this.yScale(point.y);
+      
       return (
         x >= this.margin.left &&
         x <= this.width - this.margin.right &&

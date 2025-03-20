@@ -191,6 +191,7 @@ export default {
 | `axisTextSize` | string | '12px' | 坐标轴文本大小 |
 | `curveType` | string | 'linear' | 折线类型，可选值：'linear'（直线）或'curve'（曲线） |
 | `margin` | object | {top: 20, right: 30, bottom: 40, left: 50} | 图表边距，用于控制图表内容与容器边缘的距离 |
+| `tickCount` | number | 5 | Y轴刻度数量 |
 
 ### 方法
 
@@ -214,6 +215,7 @@ export default {
 | `getAxisTextSize` | - | `string` | 获取坐标轴文本大小 |
 | `getMargin` | - | `{top: number, right: number, bottom: number, left: number}` | 获取图表边距配置 |
 | `getShowShadow` | - | `boolean` | 获取是否显示阴影 |
+| `getTickCount` | - | `number` | 获取Y轴刻度数量 |
 
 ### 数据结构
 

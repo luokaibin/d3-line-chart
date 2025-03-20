@@ -129,6 +129,14 @@ export declare class D3LineChart extends HTMLElement {
      */
     private render;
     /**
+     * 扩展Y轴比例尺域，以便更好地显示数据
+     */
+    private extendYScaleDomain;
+    /**
+     * 获取刻度数量
+     */
+    private getTickCount;
+    /**
      * 绘制网格线和坐标轴
      */
     private drawGridAndAxis;
