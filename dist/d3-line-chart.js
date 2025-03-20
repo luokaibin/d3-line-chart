@@ -744,14 +744,44 @@ var D3LineChart = (function (exports, d3) {
                 this.container.removeChild(tempElement);
                 // 计算关键点的X坐标
                 const pointX = this.xScale(point.x);
+                // 获取Y轴的实际位置（动态计算）
+                // 获取Y轴刻度值
+                const yTicks = this.yScale.ticks(this.getTickCount());
+                // 创建临时文本元素来测量文本宽度
+                const tempText = document.createElement('span');
+                tempText.style.visibility = 'hidden';
+                tempText.style.position = 'absolute';
+                tempText.style.fontSize = this.getAxisTextSize();
+                this.container.appendChild(tempText);
+                // 获取文本宽度的函数
+                const getTextWidth = (text) => {
+                    tempText.textContent = text;
+                    return tempText.offsetWidth;
+                };
+                // 格式化刻度值并计算最大宽度
+                const formattedTicksMap = formatLargeNumber(yTicks);
+                const formattedValues = Object.values(formattedTicksMap);
+                const maxWidth = Math.max(...formattedValues.map(getTextWidth));
+                // 计算Y轴的实际位置
+                const yAxisPosition = this.margin.left + maxWidth + 10;
+                // 移除临时文本元素
+                this.container.removeChild(tempText);
                 // 检查是否会超出右边界（考虑到transform: translateX(-50%)的影响，实际宽度是elementWidth/2）
                 const rightEdgePosition = pointX + elementWidth / 2;
                 const isExceedingRightBoundary = rightEdgePosition > (this.width - this.margin.right);
-                // 调整X位置，确保不超出右边界
+                // 检查是否会超出左边界（考虑到transform: translateX(-50%)的影响，实际宽度是elementWidth/2）
+                // 使用动态计算的Y轴位置，确保关键点不会绘制在Y轴之外
+                const leftEdgePosition = pointX - elementWidth / 2;
+                const isExceedingLeftBoundary = leftEdgePosition < yAxisPosition;
+                // 调整X位置，确保不超出边界
                 let leftPosition = pointX;
                 if (isExceedingRightBoundary) {
                     // 将元素右对齐到右边界
                     leftPosition = this.width - this.margin.right - elementWidth / 2;
+                }
+                else if (isExceedingLeftBoundary) {
+                    // 将元素左对齐到Y轴位置，确保完全显示在Y轴右侧
+                    leftPosition = yAxisPosition + elementWidth / 2;
                 }
                 // 设置左侧位置
                 keyPointElement.style.left = `${leftPosition}px`;
