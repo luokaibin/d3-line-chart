@@ -96,6 +96,28 @@ var D3LineChart = (function (exports, d3) {
         }
     }
     /**
+     * 基于数据范围的比例计算抽稀阈值
+     * @param points 数据点数组
+     * @returns 动态计算的抽稀阈值
+     */
+    function calculateEpsilonByRange(points) {
+        // 如果数据点太少，返回一个较小的阈值
+        if (points.length < 70) {
+            return 0.1;
+        }
+        // 计算数据的Y轴范围
+        const yValues = points.map(p => p.y);
+        const yMin = Math.min(...yValues);
+        const yMax = Math.max(...yValues);
+        const yRange = yMax - yMin;
+        // 计算基础epsilon值，范围越小，epsilon越小
+        // 使用一个系数来调整epsilon的大小
+        const coefficient = 0.01;
+        const baseEpsilon = yRange * coefficient;
+        // 确保epsilon不会太小或太大
+        return Math.min(10, baseEpsilon);
+    }
+    /**
      * 格式化大数字，如50000 -> 50K
      * @param yTicks Y轴刻度值数组
      * @returns 格式化后的对象，键为原始值，值为格式化后的字符串
@@ -610,7 +632,7 @@ var D3LineChart = (function (exports, d3) {
                 leftMargin = parseFloat(xAxisLine.attr('x1'));
             }
             // 应用数据抽稀
-            const epsilon = 0.6; // 抽稀阈值
+            const epsilon = this.getSimplifyEpsilon();
             const simplifiedData = rdpAlgorithm(this.data, epsilon);
             // 计算动画进度对应的数据点数量
             const dataLength = Math.floor(simplifiedData.length * progress);
@@ -663,7 +685,7 @@ var D3LineChart = (function (exports, d3) {
                 leftMargin = parseFloat(xAxisLine.attr('x1'));
             }
             // 应用数据抽稀
-            const epsilon = 0.6; // 抽稀阈值
+            const epsilon = this.getSimplifyEpsilon();
             const simplifiedData = rdpAlgorithm(this.data, epsilon);
             // 计算动画进度对应的数据点数量
             const dataLength = Math.floor(simplifiedData.length * progress);
@@ -847,6 +869,18 @@ var D3LineChart = (function (exports, d3) {
             };
             // 开始动画
             this.animationId = requestAnimationFrame(animate);
+        }
+        /**
+         * 获取抽稀阈值
+         * @returns 抽稀阈值
+         */
+        getSimplifyEpsilon() {
+            // 如果配置中设置了抽稀阈值，则使用配置中的值
+            if (this.config.simplifyEpsilon !== undefined) {
+                return this.config.simplifyEpsilon;
+            }
+            // 否则使用基于数据范围的计算逻辑
+            return calculateEpsilonByRange(this.data);
         }
     }
     // 注册Web Component

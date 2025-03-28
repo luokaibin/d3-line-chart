@@ -1,6 +1,6 @@
 {
   "name": "@wc-lib/d3-line-chart",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A D3.js based line chart web component",
   "main": "dist/d3-line-chart.js",
   "module": "dist/d3-line-chart.js",

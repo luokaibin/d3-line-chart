@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
 import { LineChartConfig, DataPoint, KeyPoint, KeyTick, DEFAULT_CONFIG } from './types';
-import { rdpAlgorithm, formatLargeNumber, debounce } from './utils';
+import { rdpAlgorithm, formatLargeNumber, debounce, calculateEpsilonByRange } from './utils';
 
 /**
  * D3折线图Web Component
@@ -544,7 +544,7 @@ export class D3LineChart extends HTMLElement {
     }
     
     // 应用数据抽稀
-    const epsilon = 0.6; // 抽稀阈值
+    const epsilon = this.getSimplifyEpsilon(); 
     const simplifiedData = rdpAlgorithm(this.data, epsilon);
     
     // 计算动画进度对应的数据点数量
@@ -610,7 +610,7 @@ export class D3LineChart extends HTMLElement {
     }
     
     // 应用数据抽稀
-    const epsilon = 0.6; // 抽稀阈值
+    const epsilon = this.getSimplifyEpsilon(); 
     const simplifiedData = rdpAlgorithm(this.data, epsilon);
     
     // 计算动画进度对应的数据点数量
@@ -840,6 +840,20 @@ export class D3LineChart extends HTMLElement {
     
     // 开始动画
     this.animationId = requestAnimationFrame(animate);
+  }
+  
+  /**
+   * 获取抽稀阈值
+   * @returns 抽稀阈值
+   */
+  private getSimplifyEpsilon(): number {
+    // 如果配置中设置了抽稀阈值，则使用配置中的值
+    if (this.config.simplifyEpsilon !== undefined) {
+      return this.config.simplifyEpsilon;
+    }
+    
+    // 否则使用基于数据范围的计算逻辑
+    return calculateEpsilonByRange(this.data);
   }
 }
 

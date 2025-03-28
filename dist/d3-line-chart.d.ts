@@ -163,4 +163,9 @@ export declare class D3LineChart extends HTMLElement {
      * 开始动画
      */
     private startAnimation;
+    /**
+     * 获取抽稀阈值
+     * @returns 抽稀阈值
+     */
+    private getSimplifyEpsilon;
 }

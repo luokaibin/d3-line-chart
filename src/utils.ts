@@ -66,6 +66,31 @@ export function rdpAlgorithm(points: DataPoint[], epsilon: number): DataPoint[] 
 }
 
 /**
+ * 基于数据范围的比例计算抽稀阈值
+ * @param points 数据点数组
+ * @returns 动态计算的抽稀阈值
+ */
+export function calculateEpsilonByRange(points: DataPoint[]): number {
+  // 如果数据点太少，返回一个较小的阈值
+  if (points.length < 70) {
+    return 0.1;
+  }
+  
+  // 计算数据的Y轴范围
+  const yValues = points.map(p => p.y);
+  const yMin = Math.min(...yValues);
+  const yMax = Math.max(...yValues);
+  const yRange = yMax - yMin;
+  
+  // 计算基础epsilon值，范围越小，epsilon越小
+  // 使用一个系数来调整epsilon的大小
+  const coefficient = 0.01;
+  const baseEpsilon = yRange * coefficient;
+  // 确保epsilon不会太小或太大
+  return Math.min(10, baseEpsilon);
+}
+
+/**
  * 格式化大数字，如50000 -> 50K
  * @param yTicks Y轴刻度值数组
  * @returns 格式化后的对象，键为原始值，值为格式化后的字符串

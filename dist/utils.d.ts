@@ -15,6 +15,12 @@ export declare function perpendicularDistance(point: DataPoint, lineStart: DataP
  */
 export declare function rdpAlgorithm(points: DataPoint[], epsilon: number): DataPoint[];
 /**
+ * 基于数据范围的比例计算抽稀阈值
+ * @param points 数据点数组
+ * @returns 动态计算的抽稀阈值
+ */
+export declare function calculateEpsilonByRange(points: DataPoint[]): number;
+/**
  * 格式化大数字，如50000 -> 50K
  * @param yTicks Y轴刻度值数组
  * @returns 格式化后的对象，键为原始值，值为格式化后的字符串

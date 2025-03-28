@@ -9,6 +9,7 @@ export interface LineChartConfig {
   axisTextSize?: string;     // 坐标轴文本字体大小
   curveType?: 'linear' | 'curve'; // 折线类型：直线或曲线
   tickCount?: number;        // Y轴刻度数量
+  simplifyEpsilon?: number;  // 抽稀阈值，如果不设置则根据数据范围自动计算
   margin?: {                 // 图表边距
     top?: number;            // 上边距
     right?: number;          // 右边距

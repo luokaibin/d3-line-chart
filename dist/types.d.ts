@@ -8,6 +8,7 @@ export interface LineChartConfig {
     axisTextSize?: string;
     curveType?: 'linear' | 'curve';
     tickCount?: number;
+    simplifyEpsilon?: number;
     margin?: {
         top?: number;
         right?: number;
