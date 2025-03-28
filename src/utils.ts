@@ -32,7 +32,8 @@ export function perpendicularDistance(point: DataPoint, lineStart: DataPoint, li
  * @returns 抽稀后的数据点
  */
 export function rdpAlgorithm(points: DataPoint[], epsilon: number): DataPoint[] {
-  if (points.length <= 2) {
+  // 如果数据点少于70个，不进行抽稀
+  if (points.length < 70) {
     return [...points];
   }
   

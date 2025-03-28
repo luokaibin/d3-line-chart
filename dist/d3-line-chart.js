@@ -67,7 +67,8 @@ var D3LineChart = (function (exports, d3) {
      * @returns 抽稀后的数据点
      */
     function rdpAlgorithm(points, epsilon) {
-        if (points.length <= 2) {
+        // 如果数据点少于70个，不进行抽稀
+        if (points.length < 70) {
             return [...points];
         }
         // 找到距离最远的点
