@@ -883,6 +883,8 @@ var D3LineChart = (function (exports, d3) {
             return calculateEpsilonByRange(this.data);
         }
     }
+    // 格式化大数字的静态方法
+    D3LineChart.formatLargeNumber = formatLargeNumber;
     // 注册Web Component
     customElements.define('d3-line-chart', D3LineChart);
 

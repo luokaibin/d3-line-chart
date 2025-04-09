@@ -6,6 +6,8 @@ import { rdpAlgorithm, formatLargeNumber, debounce, calculateEpsilonByRange } fr
  * D3折线图Web Component
  */
 export class D3LineChart extends HTMLElement {
+  // 格式化大数字的静态方法
+  static formatLargeNumber = formatLargeNumber;
   // Shadow DOM
   private shadow: ShadowRoot;
   

@@ -1,8 +1,10 @@
 import { LineChartConfig, DataPoint, KeyPoint, KeyTick } from './types';
+import { formatLargeNumber } from './utils';
 /**
  * D3折线图Web Component
  */
 export declare class D3LineChart extends HTMLElement {
+    static formatLargeNumber: typeof formatLargeNumber;
     private shadow;
     private container;
     private svgContainer;
