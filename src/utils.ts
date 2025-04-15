@@ -105,12 +105,18 @@ export function formatLargeNumber(yTicks: number[]): Record<number, string> {
   
   // 格式化函数，根据小数位格式化数字
   const format = (value: number, decimal: number): string => {
+    const addThousandSeparator = (num: number): string => {
+      const parts = num.toFixed(decimal).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return parts.join('.');
+    };
+
     if (Math.abs(value) >= 1000000) {
-      return (value / 1000000).toFixed(decimal) + 'M';
+      return addThousandSeparator(value / 1000000) + 'M';
     } else if (Math.abs(value) >= 1000) {
-      return (value / 1000).toFixed(decimal) + 'K';
+      return addThousandSeparator(value / 1000) + 'K';
     } else {
-      return decimal > 0 ? value.toFixed(decimal) : value.toString();
+      return decimal > 0 ? addThousandSeparator(value) : value.toString();
     }
   };
   
