@@ -341,14 +341,14 @@ export class D3LineChart extends HTMLElement {
     // 计算数据范围
     const xExtent = d3.extent(this.data, d => d.x) as [number, number];
     const yExtent = d3.extent(this.data, d => d.y) as [number, number];
-    
+
     // 设置比例尺
     this.xScale = d3.scaleLinear()
       .domain(xExtent)
       .range([this.margin.left, this.width - this.margin.right]);
     
     this.yScale = d3.scaleLinear()
-      .domain(yExtent)
+      .domain([yExtent[0], yExtent[1]])
       .range([this.height - this.margin.bottom, this.margin.top]);
   }
   
@@ -430,9 +430,9 @@ export class D3LineChart extends HTMLElement {
     d3.select(this.svgContainer).selectAll('*').remove();
     
     const g = d3.select(this.svgContainer);
-    
+    const tickCount = this.getTickCount();
     // 使用已调整好的比例尺生成刻度
-    let yTicks = this.yScale.ticks(this.getTickCount());
+    let yTicks = this.yScale.nice(tickCount).ticks(tickCount);
     // 格式化刻度值
     const formattedTicksMap = formatLargeNumber(yTicks);
     

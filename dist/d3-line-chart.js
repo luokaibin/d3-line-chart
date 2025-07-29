@@ -466,7 +466,7 @@ var D3LineChart = (function (exports, d3) {
                 .domain(xExtent)
                 .range([this.margin.left, this.width - this.margin.right]);
             this.yScale = d3__namespace.scaleLinear()
-                .domain(yExtent)
+                .domain([yExtent[0], yExtent[1]])
                 .range([this.height - this.margin.bottom, this.margin.top]);
         }
         /**
@@ -534,8 +534,9 @@ var D3LineChart = (function (exports, d3) {
             // 清除之前的元素
             d3__namespace.select(this.svgContainer).selectAll('*').remove();
             const g = d3__namespace.select(this.svgContainer);
+            const tickCount = this.getTickCount();
             // 使用已调整好的比例尺生成刻度
-            let yTicks = this.yScale.ticks(this.getTickCount());
+            let yTicks = this.yScale.nice(tickCount).ticks(tickCount);
             // 格式化刻度值
             const formattedTicksMap = formatLargeNumber(yTicks);
             // 测量文本宽度的临时SVG文本元素
