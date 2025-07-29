@@ -348,7 +348,7 @@ export class D3LineChart extends HTMLElement {
       .range([this.margin.left, this.width - this.margin.right]);
     
     this.yScale = d3.scaleLinear()
-      .domain([yExtent[0], yExtent[1]])
+      .domain(yExtent)
       .range([this.height - this.margin.bottom, this.margin.top]);
   }
   
